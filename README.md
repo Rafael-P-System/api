@@ -52,7 +52,7 @@ model/: Entidades do sistema.
 security/: Configurações de autenticação e proteção JWT (se aplicável).
 
 👤 Autor
-Rafael Pimentel - Meu GitHub
+Rafael Pimentel - Meu GitHub https://github.com/Rafael-P-System
 
 Developed with 💛 for Portfolio
 ####
