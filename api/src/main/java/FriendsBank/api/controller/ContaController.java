@@ -1,31 +1,36 @@
 package FriendsBank.api.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import FriendsBank.api.dto.ContaRequestDTO;
-import FriendsBank.api.dto.LoginRequestDTO; // Importando o novo DTO de Login
+import FriendsBank.api.dto.LoginRequestDTO;
 import FriendsBank.api.dto.TransferenciaRequestDTO;
 import FriendsBank.api.model.Conta;
 import FriendsBank.api.service.ContaService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@RestController // Define que esta classe é uma API REST
-@RequestMapping("/api/friendsbank") // A URL base para acessar este banco
+@RestController
+@RequestMapping("/api/friendsbank")
+@CrossOrigin(origins = "*")
 public class ContaController {
 
     private final ContaService contaService;
 
-    // O Spring conecta o Service aqui por Injeção de Dependência
     public ContaController(ContaService contaService) {
         this.contaService = contaService;
     }
 
-    // 1. Endpoint para criar uma conta nova (ATUALIZADO com tratamento de erro)
+    // 1. Endpoint para criar uma conta nova
     @PostMapping("/contas")
     public ResponseEntity<?> criarConta(@RequestBody ContaRequestDTO dto) {
         try {
-            // Repassando os 4 parâmetros: numero, titular, tipoConta e senha
             Conta novaConta = contaService.abrirConta(dto.numero(), dto.titular(), dto.tipoConta(), dto.senha());
             return ResponseEntity.ok(novaConta);
         } catch (RuntimeException e) {
@@ -33,19 +38,18 @@ public class ContaController {
         }
     }
 
-    // 2. NOVO: Endpoint para fazer Login e autenticar
+    // 2. Endpoint para fazer Login
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO dto) {
         try {
             Conta contaLogada = contaService.login(dto.numero(), dto.senha());
             return ResponseEntity.ok(contaLogada);
         } catch (RuntimeException e) {
-            // Retorna o status 401 (Não Autorizado) caso a senha ou conta estejam erradas
             return ResponseEntity.status(401).body(e.getMessage());
         }
     }
 
-    // 3. Endpoint para listar todas as contas (Usa nossa lista fake)
+    // 3. Endpoint para listar todas as contas
     @GetMapping("/contas")
     public ResponseEntity<List<Conta>> listarContas() {
         return ResponseEntity.ok(contaService.listarTodasAsContas());
@@ -62,7 +66,7 @@ public class ContaController {
         }
     }
 
-    // 5. Endpoint usando STREAMS: Ver patrimônio total do banco
+    // 5. Endpoint para ver patrimônio total
     @GetMapping("/patrimonio")
     public ResponseEntity<Double> verPatrimonio() {
         return ResponseEntity.ok(contaService.calcularPatrimonioTotal());

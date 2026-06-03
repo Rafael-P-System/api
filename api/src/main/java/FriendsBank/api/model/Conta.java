@@ -3,65 +3,65 @@ package FriendsBank.api.model;
 import java.util.UUID;
 
 public class Conta {
-    private String id;
-    private String numero;
-    private String titular;
-    private double saldo;
-    private String tipoConta;
-    private String senha; // Nova engrenagem para o login seguro!
+    private final String id;
+    private final String numero;
+    private final String titular;
+    private final String tipoConta;
+    private final String senha;
 
-    // Construtor completo atualizado para receber os 4 parâmetros
+    // Patrimônio segregado
+    private double saldoCorrente;
+    private double saldoInvestimento;
+    private double limiteCartao;
+
     public Conta(String numero, String titular, String tipoConta, String senha) {
-        this.id = UUID.randomUUID().toString(); // Gera um ID único automático
+        this.id = UUID.randomUUID().toString();
         this.numero = numero;
         this.titular = titular;
         this.tipoConta = tipoConta;
         this.senha = senha;
-        this.saldo = 0.0; // Toda conta premium começa com saldo zerado até receber depósito
+        this.saldoCorrente = 0.0;
+        this.saldoInvestimento = 0.0;
+        this.limiteCartao = 0.0;
     }
 
-    // Regra de Negócio: Realizar um saque seguro com validação de saldo
-    public void sacar(double valor) {
-        if (valor <= 0) {
-            throw new RuntimeException("O valor do saque deve ser maior que zero.");
-        }
-        if (valor > this.saldo) {
-            throw new RuntimeException("Saldo insuficiente para realizar a operação.");
-        }
-        this.saldo -= valor;
-    }
+    // --- MÉTODOS DE OPERAÇÃO (Exigidos pelo ContaService) ---
 
-    // Regra de Negócio: Realizar um depósito verificado
     public void depositar(double valor) {
-        if (valor <= 0) {
-            throw new RuntimeException("O valor do depósito deve ser maior que zero.");
+        if (valor <= 0) throw new RuntimeException("Depósito deve ser positivo.");
+        this.saldoCorrente += valor;
+    }
+
+    public void sacar(double valor) {
+        if (valor <= 0) throw new RuntimeException("O valor do saque deve ser maior que zero.");
+        if (valor > this.saldoCorrente) {
+            throw new RuntimeException("Saldo insuficiente na conta corrente.");
         }
-        this.saldo += valor;
+        this.saldoCorrente -= valor;
     }
 
-    // ========== GETTERS (Os acessos que as outras camadas precisam) ==========
-    
-    public String getId() {
-        return id;
-    }
-
-    public String getNumero() {
-        return numero; // ✔ Isso vai limpar o erro do ContaMemoryRepository!
-    }
-
-    public String getTitular() {
-        return titular;
-    }
+    // --- MÉTODOS DE PATRIMÔNIO (Para cálculos e compatibilidade) ---
 
     public double getSaldo() {
-        return saldo;
+        return this.saldoCorrente + this.saldoInvestimento;
     }
 
-    public String getTipoConta() {
-        return tipoConta;
+    public void depositarInvestimento(double valor) {
+        if (valor <= 0) throw new RuntimeException("Investimento deve ser positivo.");
+        this.saldoInvestimento += valor;
     }
 
-    public String getSenha() {
-        return senha; // Permite ao ContaService validar o login no backend
+    public void setLimiteCartao(double valor) {
+        this.limiteCartao = valor;
     }
+
+    // --- GETTERS ---
+    public String getId() { return id; }
+    public String getNumero() { return numero; }
+    public String getTitular() { return titular; }
+    public String getTipoConta() { return tipoConta; }
+    public String getSenha() { return senha; }
+    public double getSaldoCorrente() { return saldoCorrente; }
+    public double getSaldoInvestimento() { return saldoInvestimento; }
+    public double getLimiteCartao() { return limiteCartao; }
 }
